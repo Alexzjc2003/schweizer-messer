@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -144,19 +145,19 @@ void schmes_sb_free(schmes_StringBuilder *sb);
 // actual function definitions in the source file
 #ifdef SCHMES_IMPLEMENTATION
 
-Vec2i schmes_vec2i_add(schmes_Vec2i op1, schmes_Vec2i op2) {
+schmes_Vec2i schmes_vec2i_add(schmes_Vec2i op1, schmes_Vec2i op2) {
   return (Vec2i){.x = op1.x + op2.x, .y = op1.y + op2.y};
 }
 
-Vec2i schmes_vec2i_sub(schmes_Vec2i op1, schmes_Vec2i op2) {
+schmes_Vec2i schmes_vec2i_sub(schmes_Vec2i op1, schmes_Vec2i op2) {
   return (Vec2i){.x = op1.x - op2.x, .y = op1.y - op2.y};
 }
 
-Vec2u schmes_vec2u_add(schmes_Vec2u op1, schmes_Vec2u op2) {
+schmes_Vec2u schmes_vec2u_add(schmes_Vec2u op1, schmes_Vec2u op2) {
   return (Vec2u){.x = op1.x + op2.x, .y = op1.y + op2.y};
 }
 
-Vec2u schmes_vec2u_sub(schmes_Vec2u op1, schmes_Vec2u op2) {
+schmes_Vec2u schmes_vec2u_sub(schmes_Vec2u op1, schmes_Vec2u op2) {
   return (Vec2u){.x = op1.x - op2.x, .y = op1.y - op2.y};
 }
 
@@ -209,7 +210,7 @@ void schmes__log_fmt_v(schmes_LogLevel level, const char *fmt, va_list args) {
   fflush(schmes_file_log);
 }
 
-void schmes_log_fmt(LogLevel level, const char *fmt, ...) {
+void schmes_log_fmt(schmes_LogLevel level, const char *fmt, ...) {
   // fetch format message
   va_list args;
   va_start(args, fmt);
@@ -266,17 +267,19 @@ void schmes_sb_appendf(schmes_StringBuilder *sb, const char *fmt, ...) {
   sb->size += n;
 }
 
-void schmes_sb_append_cstr(StringBuilder *sb, const char *c_str) {
+void schmes_sb_append_cstr(schmes_StringBuilder *sb, const char *c_str) {
   schmes_da_append_items(sb, c_str, strlen(c_str));
 }
 
-void schmes_sb_append_buf(StringBuilder *sb, char *buf, size_t sz) {
+void schmes_sb_append_buf(schmes_StringBuilder *sb, char *buf, size_t sz) {
   schmes_da_append_items(sb, buf, sz);
 }
 
-void schmes_sb_append_null(StringBuilder *sb) { da_append_items(sb, "", 1); }
+void schmes_sb_append_null(schmes_StringBuilder *sb) {
+  da_append_items(sb, "", 1);
+}
 
-void schmes_sb_free(StringBuilder *sb) { da_free(sb); }
+void schmes_sb_free(schmes_StringBuilder *sb) { da_free(sb); }
 
 #endif // SCHMES_IMPLEMENTATION
 
