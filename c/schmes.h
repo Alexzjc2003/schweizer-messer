@@ -7,6 +7,7 @@
 #ifndef __schmes_h__
 #define __schmes_h__ 1
 
+#include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -138,6 +139,28 @@ void schmes_sb_append_cstr(schmes_StringBuilder *sb, const char *c_str);
 void schmes_sb_append_buf(schmes_StringBuilder *sb, char *buf, size_t sz);
 void schmes_sb_append_null(schmes_StringBuilder *sb);
 void schmes_sb_free(schmes_StringBuilder *sb);
+
+typedef struct {
+  char *data;
+  size_t size;
+} schmes_StringView;
+
+#define schmes_sv_literal(lit)                                                 \
+  ((schmes_StringView){.data = (lit), .size = sizeof(lit) - 1})
+
+schmes_StringView schmes_sv_from_sb(schmes_StringBuilder sb);
+bool schmes_sv_eq(schmes_StringView a, schmes_StringView b);
+bool schmes_sv_starts_with(schmes_StringView sv, schmes_StringView prefix);
+bool schmes_sv_ends_with(schmes_StringView sv, schmes_StringView suffix);
+schmes_StringView schmes_sv_cut_left(schmes_StringView sv, size_t n);
+schmes_StringView schmes_sv_cut_right(schmes_StringView sv, size_t n);
+schmes_StringView schmes_sv_trim_prefix(schmes_StringView sv,
+                                        schmes_StringView prefix);
+schmes_StringView schmes_sv_trim_suffix(schmes_StringView sv,
+                                        schmes_StringView suffix);
+schmes_StringView schmes_sv_trim_left(schmes_StringView sv);
+schmes_StringView schmes_sv_trim_right(schmes_StringView sv);
+schmes_StringView schmes_sv_trim_space(schmes_StringView sv);
 
 #endif // __schmes_h__
 
@@ -276,10 +299,101 @@ void schmes_sb_append_buf(schmes_StringBuilder *sb, char *buf, size_t sz) {
 }
 
 void schmes_sb_append_null(schmes_StringBuilder *sb) {
-  da_append_items(sb, "", 1);
+  schmes_da_append_items(sb, "", 1);
 }
 
-void schmes_sb_free(schmes_StringBuilder *sb) { da_free(sb); }
+void schmes_sb_free(schmes_StringBuilder *sb) { schmes_da_free(sb); }
+
+schmes_StringView schmes_sv_from_sb(schmes_StringBuilder sb) {
+  return (schmes_StringView){.data = sb.data, .size = sb.size};
+}
+
+bool schmes_sv_eq(schmes_StringView a, schmes_StringView b) {
+  if (a.size != b.size)
+    return false;
+  return memcmp(a.data, b.data, a.size) == 0;
+}
+
+bool schmes_sv_starts_with(schmes_StringView sv, schmes_StringView prefix) {
+  if (prefix.size > sv.size)
+    return false;
+  return schmes_sv_eq(
+      (schmes_StringView){
+          .data = sv.data,
+          .size = prefix.size,
+      },
+      prefix);
+}
+
+bool schmes_sv_ends_with(schmes_StringView sv, schmes_StringView suffix) {
+  if (suffix.size > sv.size)
+    return false;
+  return schmes_sv_eq(
+      (schmes_StringView){
+          .data = sv.data + sv.size - suffix.size,
+          .size = suffix.size,
+      },
+      suffix);
+}
+
+schmes_StringView schmes_sv_cut_left(schmes_StringView sv, size_t n) {
+  size_t size = sv.size > n ? sv.size - n : 0;
+  return (schmes_StringView){
+      .data = sv.data + size,
+      .size = size,
+  };
+}
+
+schmes_StringView schmes_sv_cut_right(schmes_StringView sv, size_t n) {
+  size_t size = sv.size > n ? sv.size - n : 0;
+  return (schmes_StringView){
+      .data = sv.data,
+      .size = size,
+  };
+}
+
+schmes_StringView schmes_sv_trim_prefix(schmes_StringView sv,
+                                        schmes_StringView prefix) {
+  if (schmes_sv_starts_with(sv, prefix))
+    return schmes_sv_cut_left(sv, prefix.size);
+  else
+    return sv;
+}
+
+schmes_StringView schmes_sv_trim_suffix(schmes_StringView sv,
+                                        schmes_StringView suffix) {
+  if (schmes_sv_ends_with(sv, suffix))
+    return schmes_sv_cut_right(sv, suffix.size);
+  else
+    return sv;
+}
+
+schmes_StringView schmes_sv_trim_left(schmes_StringView sv) {
+  if (sv.data == NULL)
+    return sv;
+
+  while (sv.size > 0 && isspace(sv.data[0])) {
+    ++sv.data;
+    --sv.size;
+  }
+
+  return sv;
+}
+
+schmes_StringView schmes_sv_trim_right(schmes_StringView sv) {
+  if (sv.data == NULL)
+    return sv;
+
+  while (sv.size > 0 && isspace(sv.data[sv.size - 1])) {
+    --sv.size;
+  }
+
+  return sv;
+}
+
+schmes_StringView schmes_sv_trim_space(schmes_StringView sv) {
+  return schmes_sv_trim_right(schmes_sv_trim_left(sv));
+}
 
 #endif // SCHMES_IMPLEMENTATION
 
@@ -330,6 +444,21 @@ void schmes_sb_free(schmes_StringBuilder *sb) { da_free(sb); }
 #define sb_append_buf schmes_sb_append_buf
 #define sb_append_null schmes_sb_append_null
 #define sb_free schmes_sb_free
+
+// string view
+#define StringView schmes_StringView
+#define sv_literal schmes_sv_literal
+#define sv_from_sb schmes_sv_from_sb
+#define sv_eq schmes_sv_eq
+#define sv_starts_with schmes_sv_starts_with
+#define sv_ends_with schmes_sv_ends_with
+#define sv_cut_left schmes_sv_cut_left
+#define sv_cut_right schmes_sv_cut_right
+#define sv_trim_prefix schmes_sv_trim_prefix
+#define sv_trim_suffix schmes_sv_trim_suffix
+#define sv_trim_left schmes_sv_trim_left
+#define sv_trim_right schmes_sv_trim_right
+#define sv_trim_space schmes_sv_trim_space
 
 #endif // !SCHMES_USE_PREFIX
 
