@@ -169,19 +169,19 @@ schmes_StringView schmes_sv_trim_space(schmes_StringView sv);
 #ifdef SCHMES_IMPLEMENTATION
 
 schmes_Vec2i schmes_vec2i_add(schmes_Vec2i op1, schmes_Vec2i op2) {
-  return (Vec2i){.x = op1.x + op2.x, .y = op1.y + op2.y};
+  return (schmes_Vec2i){.x = op1.x + op2.x, .y = op1.y + op2.y};
 }
 
 schmes_Vec2i schmes_vec2i_sub(schmes_Vec2i op1, schmes_Vec2i op2) {
-  return (Vec2i){.x = op1.x - op2.x, .y = op1.y - op2.y};
+  return (schmes_Vec2i){.x = op1.x - op2.x, .y = op1.y - op2.y};
 }
 
 schmes_Vec2u schmes_vec2u_add(schmes_Vec2u op1, schmes_Vec2u op2) {
-  return (Vec2u){.x = op1.x + op2.x, .y = op1.y + op2.y};
+  return (schmes_Vec2u){.x = op1.x + op2.x, .y = op1.y + op2.y};
 }
 
 schmes_Vec2u schmes_vec2u_sub(schmes_Vec2u op1, schmes_Vec2u op2) {
-  return (Vec2u){.x = op1.x - op2.x, .y = op1.y - op2.y};
+  return (schmes_Vec2u){.x = op1.x - op2.x, .y = op1.y - op2.y};
 }
 
 FILE *schmes_file_log;
